@@ -1,7 +1,13 @@
 {
 	"parser": "babel-eslint",
+	"extends": "airbnb",
     "rules": {
-        "semi": [2, "never"],
-        "eqeqeq": 2
+        "indent": [2, "tab", {"SwitchCase": 1}],
+		"jsx-quotes": [2, "prefer-single"],
+		"padded-blocks": [2, "always"],
+		"quotes": [2, "single", "avoid-escape"],
+		"react/jsx-indent-props": [2, 'tab'],
+		"no-unexpected-multiline": 2,
+		"semi": [2, "never"]
     }
 }

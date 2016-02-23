@@ -62,37 +62,135 @@
 
 	var test = true;
 
-	var mergeDataWithRaces = function mergeDataWithRaces(races) {
-		var withData = races.map(function (race) {});
-	};
+	function toPercent(x, shorten) {
 
-	var onDataResponse = function onDataResponse(response) {
-		var parsed = (0, _queryString.parse)(window.location.search);
-		var racesList = parsed.races.split(',');
-		var races = racesList.map(function (race) {
+		var decimalPlaces = shorten ? 0 : 1;
+
+		if (x === 1) {
+
+			return '100';
+		} else if (x === 0) {
+
+			return '0';
+		}
+
+		return (100 * x).toFixed(decimalPlaces).toString();
+	}
+
+	function findMatchingRace(race, racesData) {
+
+		return racesData.find(function (datum) {
+
+			var party = _electionUtils.standardize.expandParty(datum.party).toLowerCase();
+			var stateAbbr = datum.reportingUnits[0].statePostal.toLowerCase();
+			return party === race.party.toLowerCase() && stateAbbr === race.stateAbbr.toLowerCase();
+		});
+	}
+
+	function getTopTwoCandidates(raceData) {
+
+		var candidates = raceData.reportingUnits[0].candidates;
+		var sorted = _electionUtils.Candidates.sort(candidates).slice(0, 2);
+
+		var totalVotes = _electionUtils.Candidates.getVoteCount(candidates);
+
+		return sorted.map(function (candidate) {
+			var first = candidate.first;
+			var last = candidate.last;
+			var voteCount = candidate.voteCount;
+
+			var percent = toPercent(voteCount / totalVotes) + '%';
+			var isWinner = _electionUtils.Candidate.isWinner(candidate);
+
+			return { first: first, last: last, percent: percent, isWinner: isWinner };
+		});
+	}
+
+	function createCandidateElement(candidate) {
+
+		var className = candidate.isWinner ? 'is-winner' : '';
+
+		return ('\n\t\t<li class=\'candidate ' + className + '\'>\n\t\t\t<p class=\'candidate-name\'>' + candidate.last + '</p>\n\t\t\t<p class=\'candidate-percent\'>' + candidate.percent + '</p>\n\t\t</li>\n\t').trim();
+	}
+
+	function createHTML(race) {
+
+		return ('\n\t\t<div class=\'race\'>\n\t\t\t<p class=\'race-title\'>' + race.state + ' ' + race.party + ' ' + race.raceType + '</p>\n\t\t\t<ul class=\'race-candidates\'>\n\t\t\t\t' + race.candidates.map(createCandidateElement).join('') + '\n\t\t\t</ul>\n\t\t</div>\n\t').trim();
+	}
+
+	function displayRaces(races) {
+
+		var racesHTML = races.map(createHTML);
+
+		var html = racesHTML.join('');
+
+		var container = document.querySelector('.race-container');
+
+		container.innerHTML = html;
+	}
+
+	function mergeDataWithRaces(races, racesData) {
+
+		var withCandidates = races.map(function (race) {
+
+			var matchingRaceData = findMatchingRace(race, racesData);
+			var topTwo = getTopTwoCandidates(matchingRaceData);
+			var output = {
+				state: _electionUtils.standardize.expandState(race.stateAbbr),
+				party: race.party,
+				raceType: race.raceType,
+				candidates: topTwo
+			};
+
+			return output;
+		});
+
+		displayRaces(withCandidates);
+	}
+
+	function getRaceData(raceList) {
+
+		return raceList.map(function (race) {
+
 			var split = race.split('-');
 			var stateAbbr = split[0].toUpperCase();
 			var party = split[1].toUpperCase();
 
 			return _electionUtils.primaries2016Dates.find(function (p) {
+
 				var sameState = p.stateAbbr === stateAbbr;
 				var sameParty = p.party.toLowerCase() === _electionUtils.standardize.expandParty(party).toLowerCase();
 				return sameState && sameParty;
 			});
 		});
+	}
 
-		mergeDataWithRaces(races);
-	};
+	function onDataResponse(response) {
 
-	var onDataError = function onDataError(error) {
+		if (response && response.races && response.races.length) {
+
+			var parsed = (0, _queryString.parse)(window.location.search);
+			var raceList = parsed.races.split(',');
+			var races = getRaceData(raceList);
+
+			mergeDataWithRaces(races, response.races);
+		} else {
+
+			console.error('no data in response');
+		}
+	}
+
+	function onDataError(error) {
+
 		console.error(error);
-	};
+	}
 
-	var init = function init() {
+	function init() {
+
 		var date = '2016-03-01';
 		var url = (0, _urlManager2.default)({ level: 'state', date: date, test: test });
 		(0, _getJsonLite2.default)(url, onDataResponse, onDataError);
-	};
+	}
 
 	init();
 
@@ -108,7 +206,8 @@
 	unitedStates = 'default' in unitedStates ? unitedStates['default'] : unitedStates;
 
 	/**
-	 * An array of 2016 primaries dates, each with `stateAbbr`, `party`, `date` and `raceType` properties.
+	 * An array of 2016 (AP tabulated) primaries dates, each with `stateAbbr`, `party`, `date` and `raceType` properties.
+	 * Only contains state presidential primaries.
 	 * @module primaries2016Dates
 	 * @example
 	 * import { primaries2016Dates } from 'election-utils'
@@ -185,11 +284,6 @@
 		"date": "2016-03-01",
 		"raceType": "Caucuses"
 	}, {
-		"stateAbbr": "CO",
-		"party": "Republican",
-		"date": "2016-03-01",
-		"raceType": "Caucuses"
-	}, {
 		"stateAbbr": "GA",
 		"party": "Democratic",
 		"date": "2016-03-01",
@@ -269,11 +363,6 @@
 		"party": "Republican",
 		"date": "2016-03-01",
 		"raceType": "Primary"
-	}, {
-		"stateAbbr": "WY",
-		"party": "Republican",
-		"date": "2016-03-01",
-		"raceType": "Caucuses"
 	}, {
 		"stateAbbr": "KS",
 		"party": "Democratic",
@@ -315,6 +404,11 @@
 		"date": "2016-03-06",
 		"raceType": "Caucuses"
 	}, {
+		"stateAbbr": "PR",
+		"party": "Republican",
+		"date": "2016-03-06",
+		"raceType": "Primary"
+	}, {
 		"stateAbbr": "HI",
 		"party": "Republican",
 		"date": "2016-03-08",
@@ -344,11 +438,6 @@
 		"party": "Republican",
 		"date": "2016-03-08",
 		"raceType": "Primary"
-	}, {
-		"stateAbbr": "DC",
-		"party": "Republican",
-		"date": "2016-03-12",
-		"raceType": "Caucuses"
 	}, {
 		"stateAbbr": "FL",
 		"party": "Democratic",
@@ -438,11 +527,6 @@
 		"stateAbbr": "WA",
 		"party": "Democratic",
 		"date": "2016-03-26",
-		"raceType": "Caucuses"
-	}, {
-		"stateAbbr": "ND",
-		"party": "Republican",
-		"date": "2016-04-01",
 		"raceType": "Caucuses"
 	}, {
 		"stateAbbr": "WI",
@@ -564,6 +648,11 @@
 		"party": "Republican",
 		"date": "2016-05-24",
 		"raceType": "Primary"
+	}, {
+		"stateAbbr": "PR",
+		"party": "Democratic",
+		"date": "2016-06-05",
+		"raceType": "Caucuses"
 	}, {
 		"stateAbbr": "CA",
 		"party": "Democratic",
@@ -3945,207 +4034,283 @@
 	module.exports = [
 	  {
 	    "abbr": "AL",
-	    "name": "Alabama"
+	    "name": "Alabama",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "AK",
-	    "name": "Alaska"
+	    "name": "Alaska",
+	    "isTerritory": false
+	  },
+	  {
+	    "abbr": "AS",
+	    "name": "American Samoa",
+	    "isTerritory": true
 	  },
 	  {
 	    "abbr": "AZ",
-	    "name": "Arizona"
+	    "name": "Arizona",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "AR",
-	    "name": "Arkansas"
+	    "name": "Arkansas",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "CA",
-	    "name": "California"
+	    "name": "California",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "CO",
-	    "name": "Colorado"
+	    "name": "Colorado",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "CT",
-	    "name": "Connecticut"
+	    "name": "Connecticut",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "DE",
-	    "name": "Delaware"
+	    "name": "Delaware",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "DC",
-	    "name": "District Of Columbia"
+	    "name": "District Of Columbia",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "FL",
-	    "name": "Florida"
+	    "name": "Florida",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "GA",
-	    "name": "Georgia"
+	    "name": "Georgia",
+	    "isTerritory": false
+	  },
+	  {
+	    "abbr": "GU",
+	    "name": "Guam",
+	    "isTerritory": true
 	  },
 	  {
 	    "abbr": "HI",
-	    "name": "Hawaii"
+	    "name": "Hawaii",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "ID",
-	    "name": "Idaho"
+	    "name": "Idaho",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "IL",
-	    "name": "Illinois"
+	    "name": "Illinois",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "IN",
-	    "name": "Indiana"
+	    "name": "Indiana",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "IA",
-	    "name": "Iowa"
+	    "name": "Iowa",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "KS",
-	    "name": "Kansas"
+	    "name": "Kansas",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "KY",
-	    "name": "Kentucky"
+	    "name": "Kentucky",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "LA",
-	    "name": "Louisiana"
+	    "name": "Louisiana",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "ME",
-	    "name": "Maine"
+	    "name": "Maine",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MD",
-	    "name": "Maryland"
+	    "name": "Maryland",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MA",
-	    "name": "Massachusetts"
+	    "name": "Massachusetts",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MI",
-	    "name": "Michigan"
+	    "name": "Michigan",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MN",
-	    "name": "Minnesota"
+	    "name": "Minnesota",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MS",
-	    "name": "Mississippi"
+	    "name": "Mississippi",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MO",
-	    "name": "Missouri"
+	    "name": "Missouri",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "MT",
-	    "name": "Montana"
+	    "name": "Montana",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NE",
-	    "name": "Nebraska"
+	    "name": "Nebraska",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NV",
-	    "name": "Nevada"
+	    "name": "Nevada",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NH",
-	    "name": "New Hampshire"
+	    "name": "New Hampshire",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NJ",
-	    "name": "New Jersey"
+	    "name": "New Jersey",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NM",
-	    "name": "New Mexico"
+	    "name": "New Mexico",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NY",
-	    "name": "New York"
+	    "name": "New York",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "NC",
-	    "name": "North Carolina"
+	    "name": "North Carolina",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "ND",
-	    "name": "North Dakota"
+	    "name": "North Dakota",
+	    "isTerritory": false
+	  },
+	  {
+	    "abbr": "MP",
+	    "name": "Northern Mariana Islands",
+	    "isTerritory": true
 	  },
 	  {
 	    "abbr": "OH",
-	    "name": "Ohio"
+	    "name": "Ohio",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "OK",
-	    "name": "Oklahoma"
+	    "name": "Oklahoma",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "OR",
-	    "name": "Oregon"
+	    "name": "Oregon",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "PA",
-	    "name": "Pennsylvania"
+	    "name": "Pennsylvania",
+	    "isTerritory": false
+	  },
+	  {
+	    "abbr": "PR",
+	    "name": "Puerto Rico",
+	    "isTerritory": true
 	  },
 	  {
 	    "abbr": "RI",
-	    "name": "Rhode Island"
+	    "name": "Rhode Island",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "SC",
-	    "name": "South Carolina"
+	    "name": "South Carolina",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "SD",
-	    "name": "South Dakota"
+	    "name": "South Dakota",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "TN",
-	    "name": "Tennessee"
+	    "name": "Tennessee",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "TX",
-	    "name": "Texas"
+	    "name": "Texas",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "UT",
-	    "name": "Utah"
+	    "name": "Utah",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "VT",
-	    "name": "Vermont"
+	    "name": "Vermont",
+	    "isTerritory": false
+	  },
+	  {
+	    "abbr": "VI",
+	    "name": "Virgin Islands",
+	    "isTerritory": true
 	  },
 	  {
 	    "abbr": "VA",
-	    "name": "Virginia"
+	    "name": "Virginia",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "WA",
-	    "name": "Washington"
+	    "name": "Washington",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "WV",
-	    "name": "West Virginia"
+	    "name": "West Virginia",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "WI",
-	    "name": "Wisconsin"
+	    "name": "Wisconsin",
+	    "isTerritory": false
 	  },
 	  {
 	    "abbr": "WY",
-	    "name": "Wyoming"
+	    "name": "Wyoming",
+	    "isTerritory": false
 	  }
 	];
 
@@ -4276,7 +4441,7 @@
 
 		var baseUrl = test ? '//dev.apps.bostonglobe.com/electionapi/elections/' : '//www.bostonglobe.com/electionapi/elections/';
 
-		var url = '' + baseUrl + date + '?&level=' + level;
+		var url = '' + baseUrl + date + '?&level=' + level + '&officeID=P';
 
 		return url;
 	}
