@@ -2,13 +2,19 @@
 <p:out var="storyID" value="globe-iframe-graphic-${fn:replace(basepath, '/', '-')}"/>
 
 <!-- (BEGIN) globe graphic iframe -->
-<div id='${storyID}-1' class='globe-graphic-iframe' style='margin: 20px 0;'></div>
+<div id='${storyID}-super-tuesday' class='globe-graphic-iframe' style='margin: 20px 0;'></div>
 <script src='https://apps.bostonglobe.com/common/js/pym/pym-0.4.5.min.js' type='text/javascript'></script>
 <script>
     (function() {
 		var getSource = function() {
 
-
+			//========================================
+			// Insert races to show on homepage below
+			//========================================
+			var races = [
+				'ma-dem',
+				'ma-gop'
+			];
 			//========================================
 			// Insert path to jpt between quotes below
 			//========================================
@@ -39,11 +45,13 @@
 			}
 		};
 
+		var racesParam = '&races=' + races.join(',');
+
 		var pymParent;
-		var src = getSource();
+		var src = getSource() + racesParam;
 
 		if(src) {
-			pymParent = new pym.Parent('${storyID}-1', src, {});
+			pymParent = new pym.Parent('${storyID}-super-tuesday', src, {});
 			pymParent.onMessage('height-request', function(msg) { pymParent.sendMessage('height-send', window.innerHeight); });
 		}
 	})();

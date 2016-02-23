@@ -35,8 +35,20 @@
 			<div id='globe-graphic-iframe-1' style='margin: 20px 0;'></div>
 			<script src='https://apps.bostonglobe.com/common/js/pym/pym-0.4.5.min.js' type='text/javascript'></script>
 			<script>
+				//========================================
+				// Insert races to show on homepage below
+				//========================================
+				var races = [
+					'ma-dem', 
+					'ma-gop',
+				];
+
+				var racesParam = '&races=' + encodeURIComponent(races.join(','));
+			    
+			    var src = 'src/index.html?v=1' + racesParam;
+
 			    (function() {
-					var pymParent = new pym.Parent('globe-graphic-iframe-1', 'src/index.html', {});
+					var pymParent = new pym.Parent('globe-graphic-iframe-1', src, {});
 					pymParent.onMessage('height-request', function(msg) { pymParent.sendMessage('height-send', window.innerHeight); });
 				})();
 			</script>

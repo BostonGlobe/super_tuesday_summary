@@ -12,7 +12,10 @@ const config = {
 			{ test: /\.csv?$/, loader: 'dsv-loader' },
 			{ test: /\.json$/, loader: 'json-loader' },
 			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader'}
-		]
+		],
+		eslint: {
+			configFile: '.eslintrc'
+		}
 	}
 };
 

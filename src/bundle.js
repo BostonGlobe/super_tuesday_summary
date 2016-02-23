@@ -52,18 +52,36 @@
 
 	var _getJsonLite2 = _interopRequireDefault(_getJsonLite);
 
-	var _urlManager = __webpack_require__(9);
+	var _queryString = __webpack_require__(9);
+
+	var _urlManager = __webpack_require__(11);
 
 	var _urlManager2 = _interopRequireDefault(_urlManager);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var test = true;
-	// import { parse } from 'query-string';
 
+	var mergeDataWithRaces = function mergeDataWithRaces(races) {
+		var withData = races.map(function (race) {});
+	};
 
 	var onDataResponse = function onDataResponse(response) {
-		console.log(response);
+		var parsed = (0, _queryString.parse)(window.location.search);
+		var racesList = parsed.races.split(',');
+		var races = racesList.map(function (race) {
+			var split = race.split('-');
+			var stateAbbr = split[0].toUpperCase();
+			var party = split[1].toUpperCase();
+
+			return _electionUtils.primaries2016Dates.find(function (p) {
+				var sameState = p.stateAbbr === stateAbbr;
+				var sameParty = p.party.toLowerCase() === _electionUtils.standardize.expandParty(party).toLowerCase();
+				return sameState && sameParty;
+			});
+		});
+
+		mergeDataWithRaces(races);
 	};
 
 	var onDataError = function onDataError(error) {
@@ -4165,6 +4183,82 @@
 
 /***/ },
 /* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	var strictUriEncode = __webpack_require__(10);
+
+	exports.extract = function (str) {
+		return str.split('?')[1] || '';
+	};
+
+	exports.parse = function (str) {
+		if (typeof str !== 'string') {
+			return {};
+		}
+
+		str = str.trim().replace(/^(\?|#|&)/, '');
+
+		if (!str) {
+			return {};
+		}
+
+		return str.split('&').reduce(function (ret, param) {
+			var parts = param.replace(/\+/g, ' ').split('=');
+			// Firefox (pre 40) decodes `%3D` to `=`
+			// https://github.com/sindresorhus/query-string/pull/37
+			var key = parts.shift();
+			var val = parts.length > 0 ? parts.join('=') : undefined;
+
+			key = decodeURIComponent(key);
+
+			// missing `=` should be `null`:
+			// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
+			val = val === undefined ? null : decodeURIComponent(val);
+
+			if (!ret.hasOwnProperty(key)) {
+				ret[key] = val;
+			} else if (Array.isArray(ret[key])) {
+				ret[key].push(val);
+			} else {
+				ret[key] = [ret[key], val];
+			}
+
+			return ret;
+		}, {});
+	};
+
+	exports.stringify = function (obj) {
+		return obj ? Object.keys(obj).sort().map(function (key) {
+			var val = obj[key];
+
+			if (Array.isArray(val)) {
+				return val.sort().map(function (val2) {
+					return strictUriEncode(key) + '=' + strictUriEncode(val2);
+				}).join('&');
+			}
+
+			return strictUriEncode(key) + '=' + strictUriEncode(val);
+		}).filter(function (x) {
+			return x.length > 0;
+		}).join('&') : '';
+	};
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	'use strict';
+	module.exports = function (str) {
+		return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
+			return '%' + c.charCodeAt(0).toString(16).toUpperCase();
+		});
+	};
+
+
+/***/ },
+/* 11 */
 /***/ function(module, exports) {
 
 	'use strict';
