@@ -54,9 +54,17 @@
 
 	var _queryString = __webpack_require__(9);
 
-	var _urlManager = __webpack_require__(11);
+	var _periodic = __webpack_require__(11);
+
+	var _periodic2 = _interopRequireDefault(_periodic);
+
+	var _urlManager = __webpack_require__(13);
 
 	var _urlManager2 = _interopRequireDefault(_urlManager);
+
+	var _dom = __webpack_require__(14);
+
+	var _dom2 = _interopRequireDefault(_dom);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -106,37 +114,14 @@
 		});
 	}
 
-	function createCandidateElement(candidate) {
-
-		var className = candidate.isWinner ? 'is-winner' : '';
-
-		return ('\n\t\t<li class=\'candidate ' + className + '\'>\n\t\t\t<p class=\'candidate-name\'>' + candidate.last + '</p>\n\t\t\t<p class=\'candidate-percent\'>' + candidate.percent + '</p>\n\t\t</li>\n\t').trim();
-	}
-
-	function createHTML(race) {
-
-		return ('\n\t\t<div class=\'race\'>\n\t\t\t<p class=\'race-title\'>' + race.state + ' ' + race.party + ' ' + race.raceType + '</p>\n\t\t\t<ul class=\'race-candidates\'>\n\t\t\t\t' + race.candidates.map(createCandidateElement).join('') + '\n\t\t\t</ul>\n\t\t</div>\n\t').trim();
-	}
-
-	function displayRaces(races) {
-
-		var racesHTML = races.map(createHTML);
-
-		var html = racesHTML.join('');
-
-		var container = document.querySelector('.race-container');
-
-		container.innerHTML = html;
-	}
-
 	function mergeDataWithRaces(races, racesData) {
 
-		var withCandidates = races.map(function (race) {
+		return races.map(function (race) {
 
 			var matchingRaceData = findMatchingRace(race, racesData);
 			var topTwo = getTopTwoCandidates(matchingRaceData);
 			var output = {
-				state: _electionUtils.standardize.expandState(race.stateAbbr),
+				stateAbbr: race.stateAbbr,
 				party: race.party,
 				raceType: race.raceType,
 				candidates: topTwo
@@ -144,13 +129,11 @@
 
 			return output;
 		});
-
-		displayRaces(withCandidates);
 	}
 
-	function getRaceData(raceList) {
+	function getRaceData(races) {
 
-		return raceList.map(function (race) {
+		return races.map(function (race) {
 
 			var split = race.split('-');
 			var stateAbbr = split[0].toUpperCase();
@@ -165,19 +148,9 @@
 		});
 	}
 
-	function onDataResponse(response) {
+	function validateResponse(response) {
 
-		if (response && response.races && response.races.length) {
-
-			var parsed = (0, _queryString.parse)(window.location.search);
-			var raceList = parsed.races.split(',');
-			var races = getRaceData(raceList);
-
-			mergeDataWithRaces(races, response.races);
-		} else {
-
-			console.error('no data in response');
-		}
+		return response && response.races && response.races.length;
 	}
 
 	function onDataError(error) {
@@ -185,11 +158,49 @@
 		console.error(error);
 	}
 
+	function onDataResponse(races, response) {
+
+		if (validateResponse(response)) {
+
+			// combine candidates with race info
+			var withCandidates = mergeDataWithRaces(races, response.races);
+
+			// create and update candidate elements
+			_dom2.default.createCandidates(withCandidates);
+		} else {
+
+			onDataError('empty response');
+		}
+	}
+
+	function getRacesFromParams() {
+
+		var parsed = (0, _queryString.parse)(window.location.search);
+		return parsed.races.split(',');
+	}
+
 	function init() {
 
+		// get race info from election-utils based on query params
+		var arr = getRacesFromParams();
+		var races = getRaceData(arr);
+
+		// setup dom elements for each race
+		_dom2.default.createRaces(races);
+
+		// fetch race results handle response
 		var date = '2016-03-01';
-		var url = (0, _urlManager2.default)({ level: 'state', date: date, test: test });
-		(0, _getJsonLite2.default)(url, onDataResponse, onDataError);
+		var level = 'state';
+		var url = (0, _urlManager2.default)({ level: level, date: date, test: test });
+
+		(0, _periodic2.default)({ duration: 30000, callback: function callback(done) {
+
+				(0, _getJsonLite2.default)(url, function (response) {
+
+					onDataResponse(races, response);
+					done();
+				}, onDataError);
+			}, runImmediately: true });
 	}
 
 	init();
@@ -4424,6 +4435,181 @@
 
 /***/ },
 /* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var d3Timer = __webpack_require__(12);
+
+	function PeriodicJS(opts) {
+		var duration = opts.duration;
+		var displaySelector = opts.displaySelector;
+		var callback = opts.callback;
+		var runImmediately = opts.runImmediately;
+
+		var timer = undefined;
+
+		function displayTimeLeft(time) {
+
+			if (displaySelector) {
+
+				// find the current displayed time
+				var element = document.querySelector(displaySelector);
+				var currentDisplayedTime = element.innerHTML;
+
+				// format incoming time
+				var formattedTime = Math.ceil(time / 1000);
+
+				// don't update dom element with same string
+				if (formattedTime.toString() !== currentDisplayedTime) {
+					element.innerHTML = 'Update in ' + formattedTime;
+				}
+			}
+		}
+
+		function run() {
+
+			timer = d3Timer.timer(function (elapsed, time) {
+
+				// tell user how much time is left
+				displayTimeLeft(duration - elapsed);
+
+				// are we done?
+				if (elapsed > duration) {
+					timer.stop();
+
+					// call user-provided callback, and pass along run,
+					// so they can resume the timer, if so desired
+					callback(run);
+				}
+			});
+		}
+
+		if (runImmediately) {
+			callback(run);
+		} else {
+			run();
+		}
+	}
+
+	module.exports = PeriodicJS;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	(function (global, factory) {
+	   true ? factory(exports) :
+	  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	  (factory((global.d3_timer = {})));
+	}(this, function (exports) { 'use strict';
+
+	  var frame = 0;
+	  var timeout = 0;
+	  var taskHead;
+	  var taskTail;
+	  var taskId = 0;
+	  var taskById = {};
+	  var setFrame = typeof window !== "undefined"
+	      && (window.requestAnimationFrame
+	        || window.msRequestAnimationFrame
+	        || window.mozRequestAnimationFrame
+	        || window.webkitRequestAnimationFrame
+	        || window.oRequestAnimationFrame)
+	        || function(callback) { return setTimeout(callback, 17); };
+
+	  function Timer() {
+	    this.id = ++taskId;
+	  }
+
+	  Timer.prototype = timer.prototype = {
+	    restart: function(callback, delay, time) {
+	      if (typeof callback !== "function") throw new TypeError("callback is not a function");
+	      time = (time == null ? Date.now() : +time) + (delay == null ? 0 : +delay);
+	      var i = this.id, t = taskById[i];
+	      if (t) {
+	        t.callback = callback, t.time = time;
+	      } else {
+	        t = {next: null, callback: callback, time: time};
+	        if (taskTail) taskTail.next = t; else taskHead = t;
+	        taskById[i] = taskTail = t;
+	      }
+	      sleep();
+	    },
+	    stop: function() {
+	      var i = this.id, t = taskById[i];
+	      if (t) {
+	        t.callback = null, t.time = Infinity;
+	        delete taskById[i];
+	        sleep();
+	      }
+	    }
+	  };
+
+	  function timer(callback, delay, time) {
+	    var t = new Timer;
+	    t.restart(callback, delay, time);
+	    return t;
+	  }
+
+	  function timerOnce(callback, delay, time) {
+	    var t = new Timer;
+	    t.restart(function(elapsed, now) { t.stop(); callback(elapsed, now); }, delay, time);
+	    return t;
+	  }
+
+	  function timerFlush(now) {
+	    now = now == null ? Date.now() : +now;
+	    ++frame; // Pretend we’ve set an alarm, if we haven’t already.
+	    try {
+	      var t = taskHead, c;
+	      while (t) {
+	        if (now >= t.time) c = t.callback, c(now - t.time, now);
+	        t = t.next;
+	      }
+	    } finally {
+	      --frame;
+	    }
+	  }
+
+	  function wake() {
+	    frame = timeout = 0;
+	    try {
+	      timerFlush();
+	    } finally {
+	      var t0, t1 = taskHead, time = Infinity;
+	      while (t1) {
+	        if (t1.callback) {
+	          if (time > t1.time) time = t1.time;
+	          t1 = (t0 = t1).next;
+	        } else {
+	          t1 = t0 ? t0.next = t1.next : taskHead = t1.next;
+	        }
+	      }
+	      taskTail = t0;
+	      sleep(time);
+	    }
+	  }
+
+	  function sleep(time) {
+	    if (frame) return; // Soonest alarm already set, or will be.
+	    if (timeout) timeout = clearTimeout(timeout);
+	    var delay = time - Date.now();
+	    if (delay > 24) { if (time < Infinity) timeout = setTimeout(wake, delay); }
+	    else frame = 1, setFrame(wake);
+	  }
+
+	  var version = "0.1.2";
+
+	  exports.version = version;
+	  exports.timer = timer;
+	  exports.timerOnce = timerOnce;
+	  exports.timerFlush = timerFlush;
+
+	}));
+
+/***/ },
+/* 13 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -4445,6 +4631,60 @@
 
 		return url;
 	}
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _electionUtils = __webpack_require__(1);
+
+	var container = document.querySelector('.race-container');
+
+	function getRaceClassName(race) {
+
+		return (race.stateAbbr + '-' + race.party + '-' + race.raceType).toLowerCase().split(' ').join('-');
+	}
+
+	function createCandidateElement(candidate) {
+
+		var className = candidate.isWinner ? 'is-winner' : '';
+
+		return ('\n\t\t<li class=\'candidate ' + className + '\'>\n\t\t\t<p class=\'candidate-name\'>' + candidate.last + '</p>\n\t\t\t<p class=\'candidate-percent\'>' + candidate.percent + '</p>\n\t\t</li>\n\t').trim();
+	}
+
+	function createRaceElement(race) {
+
+		var className = getRaceClassName(race);
+
+		return ('\n\t\t<div class=\'race ' + className + '\'>\n\t\t\t<p class=\'race-title\'>\n\t\t\t\t' + _electionUtils.standardize.expandState(race.stateAbbr) + ' ' + race.party + ' ' + race.raceType.toLowerCase() + '\n\t\t\t</p>\n\t\t\t<ul class=\'race-candidates\'></ul>\n\t\t</div>\n\t').trim();
+	}
+
+	function createRaces(races) {
+
+		var html = races.map(createRaceElement).join('');
+		container.innerHTML = html;
+	}
+
+	function createCandidates(races) {
+
+		races.map(function (race) {
+
+			var html = race.candidates.map(createCandidateElement).join('');
+			var className = getRaceClassName(race);
+			var sel = '.' + className + ' ul';
+			var ul = document.querySelector(sel);
+
+			ul.innerHTML = html;
+		});
+	}
+
+	exports.default = { createRaces: createRaces, createCandidates: createCandidates };
 
 /***/ }
 /******/ ]);

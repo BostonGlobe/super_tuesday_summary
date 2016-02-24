@@ -1,7 +1,10 @@
 import { primaries2016Dates, standardize, Candidate, Candidates } from 'election-utils'
 import getJSON from 'get-json-lite'
 import { parse } from 'query-string'
+import periodic from 'periodic.js'
+
 import urlManager from './urlManager'
+import dom from './dom'
 
 const test = true
 
@@ -54,51 +57,14 @@ function getTopTwoCandidates(raceData) {
 
 }
 
-function createCandidateElement(candidate) {
-
-	const className = candidate.isWinner ? 'is-winner' : ''
-
-	return `
-		<li class='candidate ${className}'>
-			<p class='candidate-name'>${candidate.last}</p>
-			<p class='candidate-percent'>${candidate.percent}</p>
-		</li>
-	`.trim()
-
-}
-
-function createHTML(race) {
-
-	return `
-		<div class='race'>
-			<p class='race-title'>${race.state} ${race.party} ${race.raceType}</p>
-			<ul class='race-candidates'>
-				${race.candidates.map(createCandidateElement).join('')}
-			</ul>
-		</div>
-	`.trim()
-
-}
-
-function displayRaces(races) {
-
-	const racesHTML = races.map(createHTML)
-
-	const html = racesHTML.join('')
-
-	const container = document.querySelector('.race-container')
-
-	container.innerHTML = html
-}
-
 function mergeDataWithRaces(races, racesData) {
 
-	const withCandidates = races.map(race => {
+	return races.map(race => {
 
 		const matchingRaceData = findMatchingRace(race, racesData)
 		const topTwo = getTopTwoCandidates(matchingRaceData)
 		const output = {
-			state: standardize.expandState(race.stateAbbr),
+			stateAbbr: race.stateAbbr,
 			party: race.party,
 			raceType: race.raceType,
 			candidates: topTwo,
@@ -108,12 +74,11 @@ function mergeDataWithRaces(races, racesData) {
 
 	})
 
-	displayRaces(withCandidates)
 }
 
-function getRaceData(raceList) {
+function getRaceData(races) {
 
-	return raceList.map(race => {
+	return races.map(race => {
 
 		const split = race.split('-')
 		const stateAbbr = split[0].toUpperCase()
@@ -131,21 +96,9 @@ function getRaceData(raceList) {
 
 }
 
-function onDataResponse(response) {
+function validateResponse(response) {
 
-	if (response && response.races && response.races.length) {
-
-		const parsed = parse(window.location.search)
-		const raceList = parsed.races.split(',')
-		const races = getRaceData(raceList)
-
-		mergeDataWithRaces(races, response.races)
-
-	} else {
-
-		console.error('no data in response')
-
-	}
+	return response && response.races && response.races.length
 
 }
 
@@ -155,11 +108,55 @@ function onDataError(error) {
 
 }
 
+function onDataResponse(races, response) {
+
+	if (validateResponse(response)) {
+
+		// combine candidates with race info
+		const withCandidates = mergeDataWithRaces(races, response.races)
+
+		// create and update candidate elements
+		dom.createCandidates(withCandidates)
+
+	} else {
+
+		onDataError('empty response')
+
+	}
+
+}
+
+function getRacesFromParams() {
+
+	const parsed = parse(window.location.search)
+	return parsed.races.split(',')
+
+}
+
 function init() {
 
+	// get race info from election-utils based on query params
+	const arr = getRacesFromParams()
+	const races = getRaceData(arr)
+
+	// setup dom elements for each race
+	dom.createRaces(races)
+
+	// fetch race results handle response
 	const date = '2016-03-01'
-	const url = urlManager({ level: 'state', date, test })
-	getJSON(url, onDataResponse, onDataError)
+	const level = 'state'
+	const url = urlManager({ level, date, test })
+
+	periodic({ duration: 30000, callback: done => {
+
+		getJSON(url, response => {
+
+			onDataResponse(races, response)
+			done()
+
+		}, onDataError)
+
+	}, runImmediately: true })
 
 }
 
