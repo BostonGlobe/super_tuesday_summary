@@ -116,7 +116,7 @@ function onDataResponse(races, response) {
 		const withCandidates = mergeDataWithRaces(races, response.races)
 
 		// create and update candidate elements
-		dom.createCandidates(withCandidates)
+		dom.updateCandidates(withCandidates)
 
 	} else {
 

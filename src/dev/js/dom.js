@@ -43,9 +43,33 @@ function createRaces(races) {
 
 }
 
-function createCandidates(races) {
+function candidatesShifted(race) {
+
+	const className = getRaceClassName(race)
+	const elements = document.querySelectorAll(`.${className} ul li`)
+
+	if (elements.length) {
+
+		return race.candidates.reduce((previous, current, index) => {
+
+			const last = elements[index].querySelector('.candidate-name').textContent
+			return previous || last.toLowerCase() === current.last
+
+		}, false)
+
+	}
+
+	return false
+
+}
+
+function updateCandidates(races) {
 
 	races.map(race => {
+
+		// check if the two candidates are the same and in same position
+		const shifted = candidatesShifted(race)
+		console.log(shifted)
 
 		const html = race.candidates.map(createCandidateElement).join('')
 		const className = getRaceClassName(race)
@@ -58,4 +82,4 @@ function createCandidates(races) {
 
 }
 
-export default { createRaces, createCandidates }
+export default { createRaces, updateCandidates }
