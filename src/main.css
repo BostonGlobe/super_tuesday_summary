@@ -13,3 +13,16 @@
 /* =========================== */
 /* Graphic styles
 /* =========================== */
+.state {
+  margin: 2em 0;
+  border: 1px solid #f00;
+  width: 50%;
+  float: left;
+  padding: 1em;
+}
+.updated {
+  color: #f00;
+}
+.same {
+  color: #00f;
+}

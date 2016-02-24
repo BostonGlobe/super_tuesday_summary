@@ -1,10 +1,8 @@
-import { standardize } from 'election-utils'
-
 const container = document.querySelector('.race-container')
 
 function getRaceClassName(race) {
 
-	return `${race.stateAbbr}-${race.party}-${race.raceType}`.toLowerCase().split(' ').join('-')
+	return `race-${race.stateAbbr}-${race.party}-${race.raceType}`.toLowerCase().split(' ').join('-')
 
 }
 
@@ -13,7 +11,7 @@ function createCandidateElement(candidate) {
 	const className = candidate.isWinner ? 'is-winner' : ''
 
 	return `
-		<li class='candidate ${className}'>
+		<li class='candidate candidate-${candidate.last.replace(/W+/g, '')} ${className}'>
 			<p class='candidate-name'>${candidate.last}</p>
 			<p class='candidate-percent'>${candidate.percent}</p>
 		</li>
@@ -24,21 +22,26 @@ function createCandidateElement(candidate) {
 function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
+	return `
+		<ul class='race ${className} ${race.party.toLowerCase()}'></ul>
+	`.trim()
+
+}
+
+function createStateElement(state) {
 
 	return `
-		<div class='race ${className}'>
-			<p class='race-title'>
-				${standardize.expandState(race.stateAbbr)} ${race.party} ${race.raceType.toLowerCase()}
-			</p>
-			<ul class='race-candidates'></ul>
+		<div class='state state-${state.name}'>
+			<p class='state-name'>${state.name}</p>
+			<ul class='state-races'>${state.races.map(createRaceElement).join('')}</ul>
 		</div>
 	`.trim()
 
 }
 
-function createRaces(races) {
+function setupDOM(states) {
 
-	const html = races.map(createRaceElement).join('')
+	const html = states.map(createStateElement).join('')
 	container.innerHTML = html
 
 }
@@ -46,7 +49,7 @@ function createRaces(races) {
 function candidatesShifted(race) {
 
 	const className = getRaceClassName(race)
-	const elements = document.querySelectorAll(`.${className} ul li`)
+	const elements = document.querySelectorAll(`.${className} li`)
 
 	if (elements.length) {
 
@@ -59,27 +62,63 @@ function candidatesShifted(race) {
 
 	}
 
-	return false
+	return true
 
 }
 
-function updateCandidates(races) {
+function injectValues(race) {
 
-	races.map(race => {
+	const className = getRaceClassName(race)
+	const ul = document.querySelector(`.${className}`)
 
-		// check if the two candidates are the same and in same position
-		const shifted = candidatesShifted(race)
-		console.log(shifted)
+	race.candidates.map(candidate => {
 
-		const html = race.candidates.map(createCandidateElement).join('')
-		const className = getRaceClassName(race)
-		const sel = `.${className} ul`
-		const ul = document.querySelector(sel)
+		const sel = `li.candidate-${candidate.last.replace(/W+/g, '')} .candidate-percent`
+		const el = ul.querySelector(sel)
+		const previousPercent = el.textContent
 
-		ul.innerHTML = html
+		if (previousPercent === candidate.percent) {
+
+			el.classList.add('same')
+			el.classList.remove('updated')
+
+		} else {
+
+			el.textContent = candidate.percent
+			el.classList.add('updated')
+			el.classList.remove('same')
+
+		}
 
 	})
 
 }
 
-export default { createRaces, updateCandidates }
+function createNewCandidateElements(race) {
+
+	const html = race.candidates.map(createCandidateElement).join('')
+	const className = getRaceClassName(race)
+	const sel = `.${className}`
+	const ul = document.querySelector(sel)
+	ul.innerHTML = html
+
+}
+function updateCandidates(states) {
+
+	states.map(state => {
+
+		state.races.map(race => {
+
+			const shifted = candidatesShifted(race)
+
+			if (shifted) createNewCandidateElements(race)
+
+			else injectValues(race)
+
+		})
+
+	})
+
+}
+
+export default { setupDOM, updateCandidates }

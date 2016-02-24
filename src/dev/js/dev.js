@@ -20,6 +20,10 @@ function toPercent(x, shorten) {
 
 		return '0'
 
+	} else if(isNaN(x)) {
+
+		return '0'
+
 	}
 
 	return (100 * x).toFixed(decimalPlaces).toString()
@@ -48,6 +52,7 @@ function getTopTwoCandidates(raceData) {
 	return sorted.map(candidate => {
 
 		const { first, last, voteCount } = candidate
+
 		const percent = `${toPercent(voteCount / totalVotes)}%`
 		const isWinner = Candidate.isWinner(candidate)
 
@@ -57,40 +62,40 @@ function getTopTwoCandidates(raceData) {
 
 }
 
-function mergeDataWithRaces(races, racesData) {
+function mergeDataWithRaces(states, racesData) {
 
-	return races.map(race => {
+	return states.map(state => {
 
-		const matchingRaceData = findMatchingRace(race, racesData)
-		const topTwo = getTopTwoCandidates(matchingRaceData)
-		const output = {
-			stateAbbr: race.stateAbbr,
-			party: race.party,
-			raceType: race.raceType,
-			candidates: topTwo,
-		}
+		const races = state.races.map(race => {
 
-		return output
+			const matchingRaceData = findMatchingRace(race, racesData)
+			const topTwo = getTopTwoCandidates(matchingRaceData)
+
+			return {
+				stateAbbr: race.stateAbbr,
+				party: race.party,
+				raceType: race.raceType,
+				candidates: topTwo,
+			}
+
+		})
+
+		const name = state.name
+
+		return { name, races }
 
 	})
 
 }
 
-function getRaceData(races) {
+function getRaceData(states) {
 
-	return races.map(race => {
+	return states.map(state => {
 
-		const split = race.split('-')
-		const stateAbbr = split[0].toUpperCase()
-		const party = split[1].toUpperCase()
+		const races = primaries2016Dates.filter(race => race.stateAbbr.toLowerCase() === state)
+		const name = standardize.expandState(state)
 
-		return primaries2016Dates.find(p => {
-
-			const sameState = p.stateAbbr === stateAbbr
-			const sameParty = p.party.toLowerCase() === standardize.expandParty(party).toLowerCase()
-			return sameState && sameParty
-
-		})
+		return { name, races }
 
 	})
 
@@ -108,12 +113,12 @@ function onDataError(error) {
 
 }
 
-function onDataResponse(races, response) {
+function onDataResponse(states, response) {
 
 	if (validateResponse(response)) {
 
 		// combine candidates with race info
-		const withCandidates = mergeDataWithRaces(races, response.races)
+		const withCandidates = mergeDataWithRaces(states, response.races)
 
 		// create and update candidate elements
 		dom.updateCandidates(withCandidates)
@@ -126,7 +131,7 @@ function onDataResponse(races, response) {
 
 }
 
-function getRacesFromParams() {
+function getStatesFromParams() {
 
 	const parsed = parse(window.location.search)
 	return parsed.races.split(',')
@@ -136,22 +141,22 @@ function getRacesFromParams() {
 function init() {
 
 	// get race info from election-utils based on query params
-	const arr = getRacesFromParams()
-	const races = getRaceData(arr)
+	const states = getRaceData(getStatesFromParams())
 
-	// setup dom elements for each race
-	dom.createRaces(races)
+	// // setup dom elements for each race
+	dom.setupDOM(states)
 
 	// fetch race results handle response
 	const date = '2016-03-01'
 	const level = 'state'
 	const url = urlManager({ level, date, test })
 
+
 	periodic({ duration: 30000, callback: done => {
 
 		getJSON(url, response => {
 
-			onDataResponse(races, response)
+			onDataResponse(states, response)
 			done()
 
 		}, onDataError)
