@@ -8,10 +8,10 @@ function getRaceClassName(race) {
 
 function createCandidateElement(candidate) {
 
-	const className = candidate.isWinner ? 'is-winner' : ''
+	const winner = candidate.isWinner ? 'is-winner' : ''
 
 	return `
-		<li class='candidate candidate-${candidate.last.replace(/W+/g, '')} ${className}'>
+		<li class='candidate candidate-${candidate.last.replace(/W+/g, '')} ${winner} transparent'>
 			<p class='candidate-name'>${candidate.last}</p>
 			<p class='candidate-percent'>${candidate.percent}</p>
 		</li>
@@ -102,7 +102,20 @@ function createNewCandidateElements(race) {
 	const ul = document.querySelector(sel)
 	ul.innerHTML = html
 
+	// remove transparency
+	setTimeout(() => {
+
+		const li = ul.querySelectorAll('li')
+		for (let i = 0; i < li.length; i++) {
+
+			li[i].classList.remove('transparent')
+
+		}
+
+	}, 30)
+
 }
+
 function updateCandidates(states) {
 
 	states.map(state => {

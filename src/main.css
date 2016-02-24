@@ -20,6 +20,16 @@
   float: left;
   padding: 1em;
 }
+ul.race {
+  display: block;
+}
+ul.race .candidate {
+  -webkit-transition: 1s all;
+  transition: 1s all;
+}
+ul.race .candidate.transparent {
+  opacity: 0;
+}
 .updated {
   color: #f00;
 }
