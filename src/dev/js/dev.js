@@ -143,8 +143,11 @@ function init() {
 	// get race info from election-utils based on query params
 	const states = getRaceData(getStatesFromParams())
 
-	// // setup dom elements for each race
+	// setup dom elements for each race
 	dom.setupDOM(states)
+
+	// create drop down menu
+	dom.setupDropdown('2016-03-01')
 
 	// fetch race results handle response
 	const date = '2016-03-01'

@@ -1,4 +1,53 @@
+import { standardize, primaries2016Dates } from 'election-utils'
+
 const container = document.querySelector('.race-container')
+
+function createUrl({ stateAbbr, party, raceType }) {
+
+	const stateName = standardize.expandState(stateAbbr)
+	const stateNameLink = stateName.split(' ').join('-').toLowerCase()
+	const partyLink = party.toLowerCase()
+	const raceLink = raceType.toLowerCase()
+	const base = '//apps.bostonglobe.com/election-results/2016'
+
+	return `${base}/${raceLink}/${partyLink}/${stateNameLink}?p1=BG_super_tuesday_dropdown`
+
+}
+
+function goToRacePage() {
+
+	window.open(this.value, '_blank')
+
+}
+
+function setupDropdown(date) {
+
+	const parent = document.querySelector('.more-races')
+
+	// reduce to races on given date
+	const races = primaries2016Dates.filter(race => race.date === date)
+
+	const options = races.map(race => {
+
+		return `<option value='${createUrl(race)}'>${race.stateAbbr} (${race.party})</option>`
+
+	})
+
+	const html = `
+		<select type='dropdown' size='1' class='nav-select'>
+			<option value=''>More races</option>
+			${options.join('')}
+		</select>
+	`.trim()
+
+	parent.innerHTML = html
+
+	setTimeout(() => parent.classList.remove('transparent'), 30)
+
+	const el = document.querySelector('.more-races .nav-select')
+	el.addEventListener('change', goToRacePage)
+
+}
 
 function safeString(str) {
 
@@ -141,4 +190,4 @@ function updateCandidates(states) {
 
 }
 
-export default { setupDOM, updateCandidates }
+export default { setupDOM, setupDropdown, updateCandidates }
