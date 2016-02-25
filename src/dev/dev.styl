@@ -18,7 +18,19 @@
 /* =========================== */
 /* Graphic styles
 /* =========================== */
+$sans = Helvetica, Arial, sans-serif
+$serif = Georgia, Times, serif
+$benton = Benton, Helvetica, Arial, sans-serif
+$miller = Miller, Georgia, Times, serif
+$miller-banner = Miller-Banner, Georgia, Times, serif
 
+$regular = 400
+$bold = 700
+
+font(family = $serif, weight = 400, style = normal)
+	font-family family
+	font-weight weight
+	font-style style
 	
 .state 
 	margin 2em 0
@@ -39,3 +51,13 @@ ul.race
 	
 li.candidate
 	list-style-type none
+	
+// Select dropdown
+.nav-select
+	height 2.5em
+	width 100%
+	display inline-block
+	border 1px solid #efefef
+	cursor pointer
+	color $offblack
+	font($benton, $bold)
