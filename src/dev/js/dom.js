@@ -29,7 +29,8 @@ function setupDropdown(date) {
 
 	const options = races.map(race => {
 
-		return `<option value='${createUrl(race)}'>${race.stateAbbr} (${race.party})</option>`
+		const url = createUrl(race)
+		return `<option value='${url}'>${race.stateAbbr} (${race.party})</option>`
 
 	})
 
