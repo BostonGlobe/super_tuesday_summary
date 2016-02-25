@@ -1,5 +1,11 @@
 const container = document.querySelector('.race-container')
 
+function safeString(str) {
+
+	return str.replace(/W+/g, '').toLowerCase()
+
+}
+
 function getRaceClassName(race) {
 
 	return `race-${race.stateAbbr}-${race.party}-${race.raceType}`.toLowerCase().split(' ').join('-')
@@ -11,7 +17,7 @@ function createCandidateElement(candidate) {
 	const winner = candidate.isWinner ? 'is-winner' : ''
 
 	return `
-		<li class='candidate candidate-${candidate.last.replace(/W+/g, '')} ${winner} transparent'>
+		<li class='candidate candidate-${safeString(candidate.last)} ${winner}'>
 			<p class='candidate-name'>${candidate.last}</p>
 			<p class='candidate-percent'>${candidate.percent}</p>
 		</li>
@@ -23,7 +29,7 @@ function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
 	return `
-		<ul class='race ${className} ${race.party.toLowerCase()}'></ul>
+		<ul class='race ${className} ${safeString(race.party)} transparent'></ul>
 	`.trim()
 
 }
@@ -31,7 +37,7 @@ function createRaceElement(race) {
 function createStateElement(state) {
 
 	return `
-		<div class='state state-${state.name}'>
+		<div class='state state-${safeString(state.name)}'>
 			<p class='state-name'>${state.name}</p>
 			<ul class='state-races'>${state.races.map(createRaceElement).join('')}</ul>
 		</div>
@@ -71,48 +77,49 @@ function injectValues(race) {
 	const className = getRaceClassName(race)
 	const ul = document.querySelector(`.${className}`)
 
-	race.candidates.map(candidate => {
+	const update = race.candidates.reduce((previous, candidate) => {
 
-		const sel = `li.candidate-${candidate.last.replace(/W+/g, '')} .candidate-percent`
+		const sel = `.candidate-${safeString(candidate.last)} .candidate-percent`
 		const el = ul.querySelector(sel)
 		const previousPercent = el.textContent
 
-		if (previousPercent === candidate.percent) {
-
-			el.classList.add('same')
-			el.classList.remove('updated')
-
-		} else {
+		if (previous || previousPercent !== candidate.percent) {
 
 			el.textContent = candidate.percent
-			el.classList.add('updated')
-			el.classList.remove('same')
+			return true
 
 		}
 
-	})
+		return false
+
+	}, false)
+
+	if (update) {
+
+		ul.classList.add('update')
+
+	} else {
+
+		ul.classList.remove('update')
+
+	}
 
 }
 
 function createNewCandidateElements(race) {
 
-	const html = race.candidates.map(createCandidateElement).join('')
 	const className = getRaceClassName(race)
 	const sel = `.${className}`
 	const ul = document.querySelector(sel)
+
+	ul.classList.add('transparent')
+
+	const html = race.candidates.map(createCandidateElement).join('')
+
 	ul.innerHTML = html
 
 	// remove transparency
-	setTimeout(() => {
-
-		const li = ul.querySelectorAll('li')
-		for (let i = 0; i < li.length; i++) {
-
-			li[i].classList.remove('transparent')
-
-		}
-
-	}, 30)
+	setTimeout(() => ul.classList.remove('transparent'), 30)
 
 }
 

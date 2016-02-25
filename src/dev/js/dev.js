@@ -150,9 +150,9 @@ function init() {
 	const date = '2016-03-01'
 	const level = 'state'
 	const url = urlManager({ level, date, test })
+	const updateInterval = 15 * 1000
 
-
-	periodic({ duration: 30000, callback: done => {
+	periodic({ duration: updateInterval, callback: done => {
 
 		getJSON(url, response => {
 

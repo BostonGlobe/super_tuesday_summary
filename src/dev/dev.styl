@@ -19,6 +19,7 @@
 /* Graphic styles
 /* =========================== */
 
+	
 .state 
 	margin 2em 0
 	border 1px solid red
@@ -28,15 +29,13 @@
 	
 ul.race 
 	display block 
+	transition 1s all
 	
-	.candidate 
-		transition 1s all
-
-		&.transparent 
-			opacity 0
+	&.transparent 
+		opacity 0
+		
+	&.update 
+		background-color rgba(#fffbcc, 0.5)
 	
-.updated
-	color red
-
-.same 
-	color blue
+li.candidate
+	list-style-type none
