@@ -19,7 +19,7 @@
 			'tn',
 			'tx',
 			'vt',
-			'va'
+			'va',
 		];
 
 		var getSource = function() {
