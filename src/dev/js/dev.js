@@ -134,7 +134,8 @@ function onDataResponse(states, response) {
 function getStatesFromParams() {
 
 	const parsed = parse(window.location.search)
-	return parsed.states.split(',')
+	const states = parsed.states.split(',')
+	return states.map(s => s.toLowerCase())
 
 }
 

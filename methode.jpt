@@ -11,6 +11,21 @@
 		// Insert states to show on homepage below
 		//========================================
 		
+		/* POSSIBLE OPTIONS FOR TUESDAY:
+		
+		'al' - Alabama 
+		'ar' - Arkansas 
+		'ga' - Georgia 
+		'ma' - Massachussetts 
+		'mn' - Minnesota 
+		'ok' - Oklahoma 
+		'tn' - Tennessee 
+		'tx' - Texas 
+		'vt' - Vermont 
+		'va' - Virginia
+
+		*/
+
 		var states = [
 			'al', 
 			'ga',
