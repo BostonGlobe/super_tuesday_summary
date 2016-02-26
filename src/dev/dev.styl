@@ -36,7 +36,7 @@ $clearfix
 	overflow auto
 	zoom 1
 
-$mq-big = 50em
+$mq-big = 55em
 $mq-sm = 35em
 
 $dem = rgb(89, 136, 157)
@@ -65,7 +65,10 @@ $parties = {
 		display none
 	
 	@media only screen and (min-width: $mq-sm)
-		width calc(100% / 4)
+		width calc(100%/3)
+		
+	@media only screen and (min-width: $mq-big)
+		width calc(100% / 6)
 		
 		&:nth-child(n+5)
 			display block
@@ -165,21 +168,30 @@ for party, color in $parties
 		float right
 		font-weight $bold
 
+//Header
+.header
+	@extends $clearfix
+	padding 0 0.5em
+
 //update
 .update
 	text-align right
 	font($benton, $bold)
-	font-size 0.8em
+	font-size 0.65em
+	float right
+	line-height 1
 	
 	// Select dropdown
 .nav-select
 	height 3.5em
-	width 100%
+	width 75%
+	max-width 45em
 	display inline-block
 	border 1px solid #efefef
 	cursor pointer
 	color #222
 	font($benton, $bold)
+	float left
 
 
 .ap-test 
@@ -187,3 +199,4 @@ for party, color in $parties
 	background-color red
 	color white
 	text-align center
+	display none
