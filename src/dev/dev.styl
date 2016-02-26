@@ -58,21 +58,28 @@ $parties = {
 	padding 0.5em
 	font-size 1rem
 	
+	&:nth-child(n+5)
+		display none
+	
 	@media only screen and (min-width: $mq-sm)
 		width calc(100% / 4)
+		
+		&:nth-child(n+5)
+			display block
 
-	@media only screen and (min-width: $mq-big)
-		width calc(100% / 6)
+	// @media only screen and (min-width: $mq-big)
+	// 	width calc(100% / 6)
 	
 	&-name
 		font-weight $bold
 		color #444
 		text-transform uppercase
 		font-size 0.75em
+		
 	
 .race 
 	display block 
-	transition all 1s ease-in-out
+	transition opacity 1s ease-in-out, background-color 1s ease-in-out
 	padding 0.5em
 	
 	&.transparent 
@@ -87,7 +94,7 @@ $parties = {
 		margin-bottom 1em
 		border 2px solid #efefef
 		border-radius 3px
-		transition all 0.2s ease-in-out
+		transition border 0.2s ease-in-out
 		
 		&:last-child
 			margin-bottom 0
@@ -150,19 +157,19 @@ for party, color in $parties
 	&-percent
 		float right
 		font-weight $bold
-	
-// Select dropdown
-.nav-select
-	height 3.5em
-	width 100%
-	display inline-block
-	border 1px solid #efefef
-	cursor pointer
-	color $offblack
-	font($benton, $bold)
 
 //update
 .update
 	text-align right
 	font($benton, $bold)
 	font-size 0.8em
+	
+	// Select dropdown
+.nav-select
+	height 3.5em
+	width 100%
+	display inline-block
+	border 1px solid #efefef
+	cursor pointer
+	color #222
+	font($benton, $bold)

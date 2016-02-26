@@ -30,7 +30,9 @@ function setupDropdown(date) {
 	const options = races.map(race => {
 
 		const url = createUrl(race)
-		return `<option value='${url}'>${race.stateAbbr} (${race.party})</option>`
+		const state = standardize.expandState(race.stateAbbr)
+		const party = standardize.collapseParty(race.party)
+		return `<option value='${url}'>${state} (${party})</option>`
 
 	})
 
@@ -52,7 +54,7 @@ function setupDropdown(date) {
 
 function safeString(str) {
 
-	return str.replace(/W+/g, '').toLowerCase()
+	return str.replace(/\W+/g, '').toLowerCase()
 
 }
 
@@ -65,9 +67,10 @@ function getRaceClassName(race) {
 function createCandidateElement(candidate) {
 
 	const winner = candidate.isWinner ? 'is-winner' : ''
+	const className = safeString(candidate.last)
 
 	return `
-		<li class='candidate candidate-${safeString(candidate.last)} ${winner}'>
+		<li class='candidate candidate-${className} ${winner}'>
 			<p class='candidate-name'>${candidate.last}</p>
 			<p class='candidate-percent'>${candidate.percent}</p>
 		</li>
@@ -79,7 +82,7 @@ function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
 	return `
-		<a class='race-link ${safeString(race.party)}' href='#'>
+		<a class='race-link ${race.party.toLowerCase()}' href='#'>
 			<ul class='race ${className} transparent'></ul>
 		</a>
 	`.trim()
