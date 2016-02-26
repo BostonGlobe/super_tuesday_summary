@@ -10,7 +10,7 @@ function createUrl({ stateAbbr, party, raceType }) {
 	const raceLink = raceType.toLowerCase()
 	const base = '//apps.bostonglobe.com/election-results/2016'
 
-	return `${base}/${raceLink}/${partyLink}/${stateNameLink}?p1=BG_super_tuesday_dropdown`
+	return `${base}/${raceLink}/${partyLink}/${stateNameLink}`
 
 }
 
@@ -29,7 +29,7 @@ function setupDropdown(date) {
 
 	const options = races.map(race => {
 
-		const url = createUrl(race)
+		const url = `${createUrl(race)}?p1=BG_super_tuesday_dropdown`
 		const state = standardize.expandState(race.stateAbbr)
 		const party = standardize.collapseParty(race.party)
 		return `<option value='${url}'>${state} (${party})</option>`
@@ -81,9 +81,12 @@ function createCandidateElement(candidate) {
 function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
+	const url = `${createUrl(race)}?p1=BG_super_tuesday_racelink`
 	return `
-		<a class='race-link ${race.party.toLowerCase()}' href='#'>
-			<ul class='race ${className} transparent'></ul>
+		<a class='race-link ${race.party.toLowerCase()}' href='${url}' target='_blank'>
+			<ul class='race ${className}'>
+				<p class='loading'>Loading data...</p>
+			</ul>
 		</a>
 	`.trim()
 
