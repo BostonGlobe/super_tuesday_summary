@@ -89,14 +89,14 @@ $parties = {
 	
 .race 
 	display block 
-	transition opacity 1s ease-in-out, background-color 1s ease-in-out
+	transition opacity 1s ease-in-out, background-color 2s ease-in-out
 	padding 0.5em
 	
 	&.transparent 
 		opacity 0
 		
-	&.update 
-		background-color rgba(#fffbcc, 0.5)
+	// &.updated
+	// 	background-color rgba(#fffbcc, 0.5)
 	
 	&-link
 		display block
@@ -153,6 +153,10 @@ for party, color in $parties
 		
 		&:hover
 			border 2px solid color
+	
+	.{party} .updated
+		background-color rgba(color, 0.25)
+		
 	
 	
 .candidate

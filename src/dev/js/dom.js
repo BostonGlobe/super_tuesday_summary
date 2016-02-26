@@ -2,6 +2,22 @@ import { standardize, primaries2016Dates } from 'election-utils'
 
 const container = document.querySelector('.race-container')
 
+function whichTransitionEvent (){
+	const el = document.createElement('fakeelement');
+	const transitions = {
+		'transition':'transitionend',
+		'OTransition':'oTransitionEnd',
+		'MozTransition':'transitionend',
+		'WebkitTransition':'webkitTransitionEnd'
+	};
+
+	for (let t in transitions){
+		if (el.style[t] !== undefined){
+			return transitions[t];
+		}
+	}
+}
+
 function createUrl({ stateAbbr, party, raceType }) {
 
 	const stateName = standardize.expandState(stateAbbr)
@@ -152,13 +168,26 @@ function injectValues(race) {
 
 	}, false)
 
+	// const update = Math.random() < 0.5
+
 	if (update) {
 
-		ul.classList.add('update')
+		ul.classList.add('updated')
+
+		const transition = whichTransitionEvent()
+
+		const completed = () => {
+
+			ul.removeEventListener(transition, completed)
+			ul.classList.remove('updated')
+
+		}
+
+		ul.addEventListener(transition, completed)
 
 	} else {
 
-		ul.classList.remove('update')
+		ul.classList.remove('updated')
 
 	}
 
@@ -183,9 +212,9 @@ function createNewCandidateElements(race) {
 
 function updateCandidates(states) {
 
-	states.map(state => {
+	states.forEach(state => {
 
-		state.races.map(race => {
+		state.races.forEach(race => {
 
 			const shifted = candidatesShifted(race)
 
