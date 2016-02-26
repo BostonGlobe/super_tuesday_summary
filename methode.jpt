@@ -44,7 +44,7 @@
 			//========================================
 			// Insert path to jpt between quotes below
 			//========================================
-			var path = '';
+			var path = '/Boston/Content/Politics/WebGraphics/2016/02/superTuesdayWidget/superTuesdayWidget.jpt';
 
 
 			var test1 = '.jpt';
