@@ -134,7 +134,7 @@ function onDataResponse(states, response) {
 function getStatesFromParams() {
 
 	const parsed = parse(window.location.search)
-	return parsed.races.split(',')
+	return parsed.states.split(',')
 
 }
 

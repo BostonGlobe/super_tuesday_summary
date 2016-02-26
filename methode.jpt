@@ -9,12 +9,18 @@
 		var getSource = function() {
 
 			//========================================
-			// Insert races to show on homepage below
+			// Insert states to show on homepage below
 			//========================================
-			var races = [
-				'ma-dem',
-				'ma-gop'
-			];
+			var states = [
+					'al', 
+					'ga',
+					'mn',
+					'ok',
+					'tn',
+					'tx',
+					'vt',
+					'va'
+				];
 			//========================================
 			// Insert path to jpt between quotes below
 			//========================================
@@ -45,10 +51,9 @@
 			}
 		};
 
-		var racesParam = '&races=' + races.join(',');
-
+		var statesParam = '&states=' + encodeURIComponent(states.join(','));
 		var pymParent;
-		var src = getSource() + racesParam;
+		var src = getSource() + statesParam;
 
 		if(src) {
 			pymParent = new pym.Parent('${storyID}-super-tuesday', src, {});
