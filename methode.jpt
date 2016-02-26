@@ -34,8 +34,6 @@
 			'ok',
 			'tn',
 			'tx',
-			'vt',
-			'va',
 		];
 
 		var getSource = function() {
