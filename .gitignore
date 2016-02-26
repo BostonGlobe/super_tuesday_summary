@@ -3,3 +3,5 @@ node_modules
 src/index.html
 src/bundle.js
 src/main.css
+.tmp
+dist

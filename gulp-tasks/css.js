@@ -14,3 +14,12 @@ gulp.task('css-dev', function () {
 		.pipe(gulp.dest('src'))
 		.pipe(browserSync.reload({stream:true}));
 });
+
+gulp.task('css-prod', function () {
+	gulp.src(src)
+        .pipe(stylus())
+		.pipe(autoprefixer())
+		.pipe(rename('main.css'))
+		.pipe(gulp.dest('.tmp'))
+		.pipe(browserSync.reload({stream:true}));
+});

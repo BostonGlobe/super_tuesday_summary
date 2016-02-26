@@ -37,8 +37,8 @@ gulp.task('js-dev', function() {
 });
 
 gulp.task('js-prod', function() {
-	return gulp.src('src/js/app.js')
+	return gulp.src('src/dev/js/dev.js')
 		.pipe(webpackStream(prod_config))
 		.pipe(rename('bundle.js'))
-		.pipe(gulp.dest('.tmp/js'))
+		.pipe(gulp.dest('.tmp'))
 });

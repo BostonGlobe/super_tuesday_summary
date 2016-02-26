@@ -1,5 +1,4 @@
 var gulp = require('gulp');
-var smoosher = require('gulp-smoosher');
 var rename = require('gulp-rename');
 var browserSync = require('browser-sync');
 
@@ -14,6 +13,5 @@ gulp.task('html-dev', function() {
 
 gulp.task('html-prod', function() {
 	return gulp.src('src/index.html')
-		.pipe(smoosher())
-		.pipe(gulp.dest('dist'));
+		.pipe(gulp.dest('.tmp'));
 });
