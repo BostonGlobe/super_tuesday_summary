@@ -140,6 +140,10 @@ function getStatesFromParams() {
 
 function init() {
 
+	if (test) {
+		document.querySelector('.ap-test').classList.remove('hide')
+	}
+
 	// get race info from election-utils based on query params
 	const states = getRaceData(getStatesFromParams())
 
