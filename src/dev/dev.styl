@@ -32,16 +32,48 @@ font(family = $serif, weight = 400, style = normal)
 	font-weight weight
 	font-style style
 	
+$clearfix
+	overflow auto
+	zoom 1
+
+$mq-big = 50em
+$mq-sm = 35em
+
+$dem = rgb(89, 136, 157)
+$gop = rgb(191, 97, 81)
+
+$parties = {
+		democratic: $dem
+		republican: $gop
+}
+
+.race-container
+	@extends $clearfix
+	font($benton)
+
 .state 
-	margin 2em 0
-	border 1px solid red
+	margin 0.5em 0
 	width 50%
 	float left
-	padding 1em
+	padding 0.5em
+	font-size 1rem
 	
-ul.race 
+	@media only screen and (min-width: $mq-sm)
+		width calc(100% / 4)
+
+	@media only screen and (min-width: $mq-big)
+		width calc(100% / 6)
+	
+	&-name
+		font-weight $bold
+		color #444
+		text-transform uppercase
+		font-size 0.75em
+	
+.race 
 	display block 
-	transition 1s all
+	transition all 1s ease-in-out
+	padding 0.5em
 	
 	&.transparent 
 		opacity 0
@@ -49,15 +81,88 @@ ul.race
 	&.update 
 		background-color rgba(#fffbcc, 0.5)
 	
-li.candidate
+	&-link
+		display block
+		color #444
+		margin-bottom 1em
+		border 2px solid #efefef
+		border-radius 3px
+		transition all 0.2s ease-in-out
+		
+		&:last-child
+			margin-bottom 0
+			
+
+// Little icon thingys
+	
+for party, color in $parties
+	
+	$circle
+		display inline-block
+		width 8px
+		height 8px
+		border-radius 50%
+		border 2px solid color
+		line-height 1.2
+		margin-right 0.5em
+		text-align right
+		float left
+		margin-left -2em
+		margin-top 0.35em
+		font-size 0.65em
+		
+		@media only screen and (min-width: $mq)
+			margin-top 0.5em
+		
+		
+	.race-link.{party}
+		
+		.candidate
+			padding-left 2em
+			
+			&:not(.is-winner):first-child:before
+				content ''
+				@extends $circle
+			
+			&.is-winner:before
+				content '\2714'
+				@extends $circle
+				background-color color
+				color white
+		
+		&:hover
+			border 2px solid color
+	
+	
+.candidate
+	@extends $clearfix
 	list-style-type none
+
+	line-height 1.8
+	font-size 0.9em
+	
+	@media only screen and (min-width: $mq-big)
+		font-size 0.75em
+	
+	&-name
+		float left
+
+	&-percent
+		float right
+		font-weight $bold
 	
 // Select dropdown
 .nav-select
-	height 2.5em
+	height 3.5em
 	width 100%
 	display inline-block
 	border 1px solid #efefef
 	cursor pointer
 	color $offblack
 	font($benton, $bold)
+
+//update
+.update
+	text-align right
+	font($benton, $bold)
+	font-size 0.8em

@@ -79,7 +79,9 @@ function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
 	return `
-		<ul class='race ${className} ${safeString(race.party)} transparent'></ul>
+		<a class='race-link ${safeString(race.party)}' href='#'>
+			<ul class='race ${className} transparent'></ul>
+		</a>
 	`.trim()
 
 }
