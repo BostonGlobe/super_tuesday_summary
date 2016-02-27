@@ -90,7 +90,16 @@ function mergeDataWithRaces(states, racesData) {
 
 function getRaceData(states) {
 
-	return states.map(state => {
+	const date = '2016-03-01'
+
+	// make sure state exists and on super tuesday
+	const filtered = states.filter(state => {
+
+		return primaries2016Dates.find(r => r.stateAbbr.toLowerCase() === state && r.date === date)
+
+	})
+
+	return filtered.map(state => {
 
 		const races = primaries2016Dates.filter(race => race.stateAbbr.toLowerCase() === state)
 		const name = standardize.expandState(state)
@@ -141,9 +150,7 @@ function getStatesFromParams() {
 
 function init() {
 
-	if (test) {
-		document.querySelector('.ap-test').classList.remove('hide')
-	}
+	if (test) document.querySelector('.ap-test').classList.remove('hide')
 
 	// get race info from election-utils based on query params
 	const states = getRaceData(getStatesFromParams())
@@ -161,6 +168,7 @@ function init() {
 	const duration = 30 * 1000
 	const displaySelector = '.update-text'
 
+	// updater timer
 	periodic({ duration, displaySelector, callback: done => {
 
 		const element = document.querySelector(displaySelector)
