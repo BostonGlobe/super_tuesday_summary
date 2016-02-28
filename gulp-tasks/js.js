@@ -5,6 +5,7 @@ const webpackStream = require('webpack-stream');
 const webpack       = require('webpack');
 const plumber		= require('gulp-plumber');
 const report 		= require('../report-error.js');
+const argv        	= require('yargs').argv;
 
 const config = {
 	module: {
@@ -16,7 +17,12 @@ const config = {
 		eslint: {
 			configFile: '.eslintrc'
 		}
-	}
+	},
+	plugins: [
+		new webpack.DefinePlugin({
+			'process.env.test': argv.test
+		})
+	]
 };
 
 const prod_config = Object.assign({}, config, {

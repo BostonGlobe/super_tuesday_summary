@@ -6,8 +6,6 @@ import periodic from 'periodic.js'
 import urlManager from './urlManager'
 import dom from './dom'
 
-const test = true
-
 function toPercent(x, shorten) {
 
 	const decimalPlaces = shorten ? 0 : 1
@@ -150,7 +148,7 @@ function getStatesFromParams() {
 
 function init() {
 
-	if (test) document.querySelector('.ap-test').classList.remove('hide')
+	if (process.env.test) document.querySelector('.ap-test').classList.remove('hide')
 
 	// get race info from election-utils based on query params
 	const states = getRaceData(getStatesFromParams())
@@ -164,7 +162,7 @@ function init() {
 	// fetch race results handle response
 	const date = '2016-03-01'
 	const level = 'state'
-	const url = urlManager({ level, date, test })
+	const url = urlManager({ level, date })
 	const duration = 30 * 1000
 	const displaySelector = '.update-text'
 
