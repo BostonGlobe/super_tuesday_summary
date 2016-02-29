@@ -173,10 +173,10 @@ function init() {
 	dom.setupDOM(states)
 
 	// create both drop down menus
-	const parent1 = document.querySelector('.more-races.above')
-	const parent2 = document.querySelector('.more-races.below')
-	dom.setupDropdown(parent1, '2016-03-01')
-	dom.setupDropdown(parent2, '2016-03-01')
+	// const parent1 = document.querySelector('.more-races.above')
+	// const parent2 = document.querySelector('.more-races.below')
+	// dom.setupDropdown(parent1, '2016-03-01')
+	// dom.setupDropdown(parent2, '2016-03-01')
 
 	// fetch race results handle response
 	const date = '2016-03-01'
