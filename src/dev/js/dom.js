@@ -76,6 +76,12 @@ function getRaceClassName(race) {
 
 }
 
+function getReportingClassName(race) {
+
+	return `reporting-${race.stateAbbr}-${race.party}`.toLowerCase().split(' ').join('-')
+
+}
+
 function createCandidateElement(candidate) {
 
 	const winner = candidate.isWinner ? 'is-winner' : ''
@@ -93,6 +99,7 @@ function createCandidateElement(candidate) {
 function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
+	const reportingClassName = getReportingClassName(race)
 	const url = `${createUrl(race)}?p1=BG_super_tuesday_racelink`
 	return `
 		<a class='race-link ${race.party.toLowerCase()}' href='${url}' target='_blank'>
@@ -100,6 +107,7 @@ function createRaceElement(race) {
 				<p class='loading'>Loading data...</p>
 			</ul>
 		</a>
+		<p class='race-reporting ${reportingClassName}'></p>
 	`.trim()
 
 }
@@ -109,7 +117,7 @@ function createStateElement(state) {
 	return `
 		<div class='state state-${safeString(state.name)}'>
 			<p class='state-name'>${state.name}</p>
-			<ul class='state-races'>${state.races.map(createRaceElement).join('')}</ul>
+			<div class='state-races'>${state.races.map(createRaceElement).join('')}</div>
 		</div>
 	`.trim()
 
@@ -151,6 +159,9 @@ function injectValues(race) {
 
 		const sel = `.candidate-${safeString(candidate.last)} .candidate-percent`
 		const el = ul.querySelector(sel)
+
+		if (!el) return false
+
 		const previousPercent = el.textContent
 
 		if (previous || previousPercent !== candidate.percent) {
@@ -206,11 +217,23 @@ function createNewCandidateElements(race) {
 
 }
 
+function updateReporting(race) {
+
+	const className = getReportingClassName(race)
+	const sel = `.${className}`
+	const el = document.querySelector(sel)
+	el.textContent = `${race.reporting}% reporting`
+
+}
+
 function updateCandidates(states) {
 
 	states.forEach(state => {
 
 		state.races.forEach(race => {
+
+			// update reporting
+			updateReporting(race)
 
 			const shifted = candidatesShifted(race)
 

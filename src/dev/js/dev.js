@@ -89,6 +89,7 @@ function mergeDataWithRaces(states, racesData) {
 				party: race.party,
 				raceType: race.raceType,
 				candidates: topTwo,
+				reporting: (+matchingRaceData.reportingUnits[0].precinctsReportingPct).toFixed(1),
 			}
 
 		})
@@ -181,7 +182,7 @@ function init() {
 	const date = '2016-03-01'
 	const level = 'state'
 	const url = urlManager({ level, date })
-	const duration = 30 * 1000
+	const duration = 15 * 1000
 	const displaySelector = '.update-text'
 
 	// updater timer
