@@ -1,4 +1,4 @@
-import { primaries2016Dates, standardize, Candidate, Candidates } from 'election-utils'
+import { primaries2016Dates, primaries2016Candidates, standardize, Candidate, Candidates } from 'election-utils'
 import getJSON from 'get-json-lite'
 import { parse } from 'query-string'
 import periodic from 'periodic.js'
@@ -18,7 +18,7 @@ function toPercent(x, shorten) {
 
 		return '0'
 
-	} else if(isNaN(x)) {
+	} else if (isNaN(x)) {
 
 		return '0'
 
@@ -43,11 +43,26 @@ function findMatchingRace(race, racesData) {
 function getTopTwoCandidates(raceData) {
 
 	const candidates = raceData.reportingUnits[0].candidates
-	const sorted = Candidates.sort(candidates).slice(0, 2)
+
+	// filter out not real candidates
+	const filtered = candidates.filter(c => primaries2016Candidates.find(c2 => c2.last === c.last.toLowerCase()))
+
+	// sort by still active first, then ballot order, then  votes
+	const topTwo = filtered.map(c => {
+		const cand = primaries2016Candidates.find(c2 => c2.last === c.last.toLowerCase())
+
+		c.active = cand.suspendedDate ? 0 : 1
+		return c
+
+	})
+	.sort((a, b) => a.ballotOrder - b.ballotOrder)
+	.sort((a, b) => b.active - a.active)
+	.sort((a, b) => b.voteCount - a.voteCount)
+	.slice(0, 2)
 
 	const totalVotes = Candidates.getVoteCount(candidates)
 
-	return sorted.map(candidate => {
+	return topTwo.map(candidate => {
 
 		const { first, last, voteCount } = candidate
 
