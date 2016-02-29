@@ -2,6 +2,7 @@ import { primaries2016Dates, primaries2016Candidates, standardize, Candidate, Ca
 import getJSON from 'get-json-lite'
 import { parse } from 'query-string'
 import periodic from 'periodic.js'
+import orderBy from 'lodash.orderby'
 
 import urlManager from './urlManager'
 import dom from './dom'
@@ -47,22 +48,21 @@ function getTopTwoCandidates(raceData) {
 	// filter out not real candidates
 	const filtered = candidates.filter(c => primaries2016Candidates.find(c2 => c2.last === c.last.toLowerCase()))
 
-	// sort by still active first, then ballot order, then  votes
-	const topTwo = filtered.map(c => {
+	// sort by votes, ballot order, active
+	const withActive = filtered.map(c => {
 		const cand = primaries2016Candidates.find(c2 => c2.last === c.last.toLowerCase())
 
 		c.active = cand.suspendedDate ? 0 : 1
 		return c
 
 	})
-	.sort((a, b) => a.ballotOrder - b.ballotOrder)
-	.sort((a, b) => b.active - a.active)
-	.sort((a, b) => b.voteCount - a.voteCount)
-	.slice(0, 2)
+
+	const ordered = orderBy(withActive, ['voteCount', 'active', 'ballotOrder'], ['desc', 'desc', 'asc'])
 
 	const totalVotes = Candidates.getVoteCount(candidates)
 
-	return topTwo.map(candidate => {
+	// return top two with percents 
+	return ordered.map(candidate => {
 
 		const { first, last, voteCount } = candidate
 
@@ -71,7 +71,7 @@ function getTopTwoCandidates(raceData) {
 
 		return { first, last, percent, isWinner }
 
-	})
+	}).slice(0, 2)
 
 }
 
@@ -178,7 +178,7 @@ function init() {
 	const date = '2016-03-01'
 	const level = 'state'
 	const url = urlManager({ level, date })
-	const duration = 30 * 1000
+	const duration = 300 * 1000
 	const displaySelector = '.update-text'
 
 	// updater timer
