@@ -48,6 +48,9 @@ $parties = {
 		republican: $gop
 }
 
+.transparent 
+	opacity 0
+	
 .hide
 	display none
 
@@ -92,9 +95,6 @@ $parties = {
 	display block 
 	transition opacity 1s ease-in-out, background-color 2s ease-in-out
 	padding 0.4em
-	
-	&.transparent 
-		opacity 0
 		
 	// &.updated
 	// 	background-color rgba(#fffbcc, 0.5)
@@ -187,16 +187,22 @@ header
 	overflow hidden
 	padding 0 0.5em
 	
+	.left 
+		width 80%
+		float left
+	
+	.right 
+		width 20%
+		float left 
+
 	.hed 
 		font($benton, $bold)
-		width 50%
-		float left
 		color #333
+		margin-right 1em
+		display inline-block
 
 	//update
 	.update
-		width 50%
-		float left
 		text-align right
 		font($benton)
 		color #999
@@ -204,11 +210,21 @@ header
 	
 // Select dropdown
 .more-races
-	padding 0.5em
 	text-align right
 	
+	&.above 
+		display none
+		@media only screen and (min-width: $mq-sm)
+			display inline-block
+	
+	&.below
+		display block
+		@media only screen and (min-width: $mq-sm)
+			display none
+
+	
 select.nav-select
-	height 3.5em
+	height 3em
 	display inline-block
 	border 2px solid #ccc
 	background-color #efefef

@@ -36,9 +36,7 @@ function goToRacePage() {
 
 }
 
-function setupDropdown(date) {
-
-	const parent = document.querySelector('.more-races')
+function setupDropdown(parent, date) {
 
 	// reduce to races on given date
 	const races = primaries2016Dates.filter(race => race.date === date)
@@ -60,8 +58,6 @@ function setupDropdown(date) {
 	`.trim()
 
 	parent.innerHTML = html
-
-	setTimeout(() => parent.classList.remove('transparent'), 30)
 
 	const el = document.querySelector('.more-races .nav-select')
 	el.addEventListener('change', goToRacePage)
