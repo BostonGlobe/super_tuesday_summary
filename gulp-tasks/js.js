@@ -29,7 +29,10 @@ const prod_config = Object.assign({}, config, {
 	plugins: [
 		new webpack.optimize.UglifyJsPlugin(),
 		new webpack.optimize.OccurenceOrderPlugin(),
-		new webpack.optimize.DedupePlugin()
+		new webpack.optimize.DedupePlugin(),
+		new webpack.DefinePlugin({
+			'process.env.test': argv.test
+		})
 	]
 });
 
