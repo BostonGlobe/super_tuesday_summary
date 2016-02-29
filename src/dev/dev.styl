@@ -37,6 +37,7 @@ $clearfix
 	zoom 1
 
 $mq-big = 53em
+$mq-med = 40em
 $mq-sm = 35em
 
 $dem = rgb(89, 136, 157)
@@ -90,7 +91,7 @@ $parties = {
 .race 
 	display block 
 	transition opacity 1s ease-in-out, background-color 2s ease-in-out
-	padding 0.5em
+	padding 0.4em
 	
 	&.transparent 
 		opacity 0
@@ -163,10 +164,10 @@ for party, color in $parties
 	@extends $clearfix
 	list-style-type none
 
-	line-height 1.8
-	font-size 0.9em
+	line-height 1.6
+	font-size 1em
 	
-	@media only screen and (min-width: $mq-big)
+	@media only screen and (min-width: $mq-med)
 		font-size 0.75em
 	
 	&-name
@@ -181,13 +182,25 @@ for party, color in $parties
 // 	@extends $clearfix
 // 	padding 0 0.5em
 
-//update
-.update
-	text-align right
-	font($benton, $bold)
-	font-size 0.65em
+header
+	height 100%
+	overflow hidden
 	padding 0 0.5em
-	line-height 1
+	
+	.hed 
+		font($benton, $bold)
+		width 50%
+		float left
+		color #333
+
+	//update
+	.update
+		width 50%
+		float left
+		text-align right
+		font($benton)
+		color #999
+		font-size 0.7em
 	
 // Select dropdown
 .more-races
