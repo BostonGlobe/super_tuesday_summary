@@ -100,7 +100,7 @@ function createRaceElement(race) {
 
 	const className = getRaceClassName(race)
 	const reportingClassName = getReportingClassName(race)
-	const url = `${createUrl(race)}?p1=BG_super_tuesday_racelink`
+	const url = `${createUrl(race)}?p1=BG_super_tuesday_race_link`
 	return `
 		<a class='race-link ${race.party.toLowerCase()}' href='${url}' target='_blank'>
 			<ul class='race ${className}'>
