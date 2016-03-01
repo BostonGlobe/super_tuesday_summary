@@ -1,4 +1,4 @@
-import { primaries2016Dates, primaries2016Candidates, standardize, Candidate, Candidates } from 'election-utils'
+import { primaries2016Dates, primaries2016Candidates, standardize, Candidate, Candidates, formatTimestamp } from 'election-utils'
 import getJSON from 'get-json-lite'
 import { parse } from 'query-string'
 import periodic from 'periodic.js'
@@ -142,6 +142,10 @@ function onDataResponse(states, response) {
 
 		// combine candidates with race info
 		const withCandidates = mergeDataWithRaces(states, response.races)
+
+		const timestamp = formatTimestamp(response)
+		
+		dom.updateTimestamp(timestamp)
 
 		// create and update candidate elements
 		dom.updateCandidates(withCandidates)

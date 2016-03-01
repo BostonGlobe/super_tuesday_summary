@@ -1,6 +1,7 @@
 import { standardize, primaries2016Dates } from 'election-utils'
 
 const container = document.querySelector('.race-container')
+const timestamp = document.querySelector('.timestamp')
 
 function whichTransitionEvent (){
 	const el = document.createElement('fakeelement');
@@ -247,4 +248,10 @@ function updateCandidates(states) {
 
 }
 
-export default { setupDOM, setupDropdown, updateCandidates }
+function updateTimestamp(str) {
+
+	timestamp.textContent = `Last updated ${str}`
+
+}
+
+export default { setupDOM, setupDropdown, updateCandidates, updateTimestamp }

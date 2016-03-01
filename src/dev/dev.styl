@@ -194,12 +194,18 @@ header
 	padding 0.25em 0.5em
 	
 	.left 
-		width 80%
-		float left
+		width 100%
+		@media only screen and (min-width: $mq-sm)
+			float left 
+			width 75%
 	
 	.right 
-		width 20%
-		float left 
+		width 100%
+		text-align left
+		@media only screen and (min-width: $mq-sm)
+			text-align right
+			float left 
+			width 25% 
 
 	.hed 
 		font($benton, $bold)
@@ -209,7 +215,6 @@ header
 
 	//update
 	.update
-		text-align right
 		font($benton)
 		color #999
 		font-size 0.7em
@@ -275,3 +280,9 @@ select.nav-select
 		background-color #ddd
 		color #222
 		transition background-color 0.2s ease-in-out
+
+.timestamp 
+	font($benton)
+	color #999
+	font-size 0.7em
+	line-height 1
