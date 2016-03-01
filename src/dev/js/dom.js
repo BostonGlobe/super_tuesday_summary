@@ -131,16 +131,16 @@ function setupDOM(states) {
 }
 
 function candidatesShifted(race) {
-
 	const className = getRaceClassName(race)
 	const elements = document.querySelectorAll(`.${className} li`)
 
 	if (elements.length) {
 
+		// determine if we should shift
 		return race.candidates.reduce((previous, current, index) => {
-
 			const last = elements[index].querySelector('.candidate-name').textContent
-			return previous || last.toLowerCase() === current.last
+			const shifted = previous || last.toLowerCase() !== current.last.toLowerCase()
+			return shifted
 
 		}, false)
 
@@ -235,7 +235,7 @@ function updateCandidates(states) {
 			// update reporting
 			updateReporting(race)
 
-			const shifted = candidatesShifted(race)
+			const shifted = true || candidatesShifted(race)
 
 			if (shifted) createNewCandidateElements(race)
 
