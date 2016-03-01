@@ -24,11 +24,12 @@
 
 		//===================================
 		// Insert states to show on homepage
-		// Choose 6 from above and put below
+		// Choose 6 from above, and put below
+		// Top 4 will be shown on mobile
 		//===================================
-
+	
 		var states = [
-			'al', 
+			'ma', 
 			'ga',
 			'mn',
 			'ok',
