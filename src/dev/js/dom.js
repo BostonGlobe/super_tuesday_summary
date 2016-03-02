@@ -236,7 +236,7 @@ function updateCandidates(states) {
 			// update reporting
 			updateReporting(race)
 
-			const shifted = true || candidatesShifted(race)
+			const shifted = candidatesShifted(race)
 
 			if (shifted) createNewCandidateElements(race)
 
