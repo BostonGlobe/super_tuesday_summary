@@ -7,9 +7,6 @@ import orderBy from 'lodash.orderby'
 import urlManager from './urlManager'
 import dom from './dom'
 
-if (console && console.log) {
-	console.log('super tuesday');
-}
 if (!Array.prototype.find) {
   Array.prototype.find = function(predicate) {
     if (this === null) {
@@ -130,7 +127,7 @@ function mergeDataWithRaces(states, racesData) {
 
 function getRaceData(states) {
 
-	const date = '2016-03-01'
+	const date = '2016-03-15'
 
 	// make sure state exists and on super tuesday
 	const filtered = states.filter(state => {
