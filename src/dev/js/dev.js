@@ -7,6 +7,8 @@ import orderBy from 'lodash.orderby'
 import urlManager from './urlManager'
 import dom from './dom'
 
+const date = '2016-03-15'
+
 if (!Array.prototype.find) {
   Array.prototype.find = function(predicate) {
     if (this === null) {
@@ -56,9 +58,16 @@ function findMatchingRace(race, racesData) {
 
 	return racesData.find(datum => {
 
-		const party = standardize.expandParty(datum.party).toLowerCase()
-		const stateAbbr = datum.reportingUnits[0].statePostal.toLowerCase()
-		return party === race.party.toLowerCase() && stateAbbr === race.stateAbbr.toLowerCase()
+		const lowerParty = datum.party.toLowerCase()
+		if (lowerParty === 'gop' || lowerParty === 'dem') {
+
+			const party = standardize.expandParty(datum.party).toLowerCase()
+			const stateAbbr = datum.reportingUnits[0].statePostal.toLowerCase()
+			return party === race.party.toLowerCase() && stateAbbr === race.stateAbbr.toLowerCase()
+
+		}
+
+		return false
 
 	})
 
@@ -99,12 +108,12 @@ function getTopTwoCandidates(raceData) {
 }
 
 function mergeDataWithRaces(states, racesData) {
-
 	return states.map(state => {
 
 		const races = state.races.map(race => {
 
 			const matchingRaceData = findMatchingRace(race, racesData)
+
 			const topTwo = getTopTwoCandidates(matchingRaceData)
 
 			return {
@@ -127,14 +136,12 @@ function mergeDataWithRaces(states, racesData) {
 
 function getRaceData(states) {
 
-	const date = '2016-03-15'
-
 	// make sure state exists and on super tuesday
-	const filtered = states.filter(state => {
+	const filtered = states.filter(state => 
 
-		return primaries2016Dates.find(r => r.stateAbbr.toLowerCase() === state && r.date === date)
+		primaries2016Dates.find(r => r.stateAbbr.toLowerCase() === state && r.date === date)
 
-	})
+	)
 
 	return filtered.map(state => {
 
@@ -206,7 +213,6 @@ function init() {
 	// dom.setupDropdown(parent2, '2016-03-01')
 
 	// fetch race results handle response
-	const date = '2016-03-01'
 	const level = 'state'
 	const url = urlManager({ level, date })
 	const duration = 15 * 1000

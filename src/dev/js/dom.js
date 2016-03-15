@@ -158,16 +158,19 @@ function injectValues(race) {
 
 	const update = race.candidates.reduce((previous, candidate) => {
 
-		const sel = `.candidate-${safeString(candidate.last)} .candidate-percent`
-		const el = ul.querySelector(sel)
+		const sel = `.candidate-${safeString(candidate.last)}`
+		const percentEl = ul.querySelector(`${sel} .candidate-percent`)
+		const candidateEl = ul.querySelector('li.candidate')
 
-		if (!el) return false
+		if (!percentEl || !candidateEl) return false
 
-		const previousPercent = el.textContent
+		const previousWinner = candidateEl.classList.contains('is-winner')
+		const previousPercent = percentEl.textContent
 
-		if (previous || previousPercent !== candidate.percent) {
+		if (previous || (previousPercent !== candidate.percent) || (previousWinner !== candidate.isWinner)) {
 
-			el.textContent = candidate.percent
+			percentEl.textContent = candidate.percent
+			if (candidate.isWinner) candidateEl.classList.add('is-winner')
 			return true
 
 		}
