@@ -160,7 +160,7 @@ function injectValues(race) {
 
 		const sel = `.candidate-${safeString(candidate.last)}`
 		const percentEl = ul.querySelector(`${sel} .candidate-percent`)
-		const candidateEl = ul.querySelector('li.candidate')
+		const candidateEl = ul.querySelector(sel)
 
 		if (!percentEl || !candidateEl) return false
 
